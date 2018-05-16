@@ -5,7 +5,6 @@
  */
 
 import React, { Component  } from 'react';
-import PropTypes from 'prop-types';
 import {
   Platform,
   StyleSheet,
@@ -15,81 +14,18 @@ import {
   Button,
   TouchableOpacity
 } from 'react-native';
+import {connect} from 'react-redux';
+import {bindActionCreators} from 'redux'
 
-class CustomButton extends Component {
+import CustomButton from './components/customButton'
+
+import {evaluateInput, operandInput, clearScreen, numberInput} from './actions'
+
+class App extends Component {
   
-  constructor(props) {
-    super(props)
-  }
-  render() {
-    return (
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style= {styles.numberButton}
-          onPress={() => this.props.evaluateInp(this.props.value)}
-        >
-          <Text style = {{
-            alignSelf:'center',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 30}}
-          >
-            {this.props.value}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
-}
-CustomButton.propTypes = {
-  evaluateInp: PropTypes.func
-}
-
-export default class App extends Component {
-  
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isResultToBeDisplayed: false,
-      evalExp: '',
-      result: ''
-    }
-
-    this.evaluateInp = (x) => {
-      this.setState((prev) => {return {
-          isResultToBeDisplayed: true,
-          result: eval(prev.evalExp)
-      }});
-    }
-
-    this.numberInput = (x) => {
-      this.setState((prev) => {return {
-          isResultToBeDisplayed: false,
-          evalExp : !prev.isResultToBeDisplayed ? prev.evalExp + x : x
-      }});
-    }
-    this.operandInput = (x) => {
-      this.setState((prev) => {return {
-        isResultToBeDisplayed: false,
-        evalExp : !prev.isResultToBeDisplayed  
-                    ? prev.evalExp == '' ? '0' + x : prev.evalExp + x 
-                    : prev.result + x,
-        result : ''
-      }});
-    }
-    this.clearScreen = () => {
-      this.setState((prev) => {return {
-          isResultToBeDisplayed: false,
-          evalExp : '',
-          result: ''
-      }});
-    }
-    
-  }
 
   render() {
+    console.log(this.props)
     return (
       <View style={styles.container}>
         <View style={styles.headerContainer}>
@@ -98,38 +34,38 @@ export default class App extends Component {
         <View style={styles.displayContainer}>
           <Text style={[
             styles.welcome, 
-            {fontSize:this.state.isResultToBeDisplayed?20:50}
+            {fontSize:this.props.evaluator.isResultToBeDisplayed?20:50}
           ]}>
-            {this.state.evalExp}
+            {this.props.evaluator.evalExp}
           </Text>
           <Text style={[styles.welcome, {justifyContent: 'flex-end'}]}>
-            {this.state.isResultToBeDisplayed ? '= ' + this.state.result : '' }
+            {this.props.evaluator.isResultToBeDisplayed ? '= ' + this.props.evaluator.result : '' }
           </Text>
         </View>
         <View style = {styles.inputContainerHolder}>
           <View style={styles.inputContainer}>
-            <CustomButton value='1' evaluateInp={this.numberInput} />
-            <CustomButton value='2' evaluateInp={this.numberInput} />
-            <CustomButton value='3' evaluateInp={this.numberInput} />
-            <CustomButton value='*' evaluateInp={this.operandInput} />
+            <CustomButton value='1' evaluateInp={this.props.numberInput} />
+            <CustomButton value='2' evaluateInp={this.props.numberInput} />
+            <CustomButton value='3' evaluateInp={this.props.numberInput} />
+            <CustomButton value='*' evaluateInp={this.props.operandInput} />
           </View>
           <View style={styles.inputContainer}>
-            <CustomButton value='4' evaluateInp={this.numberInput} />
-            <CustomButton value='5' evaluateInp={this.numberInput} />
-            <CustomButton value='6' evaluateInp={this.numberInput} />
-            <CustomButton value='/' evaluateInp={this.operandInput} />
+            <CustomButton value='4' evaluateInp={this.props.numberInput} />
+            <CustomButton value='5' evaluateInp={this.props.numberInput} />
+            <CustomButton value='6' evaluateInp={this.props.numberInput} />
+            <CustomButton value='/' evaluateInp={this.props.operandInput} />
           </View>
           <View style={styles.inputContainer}>
-            <CustomButton value='7' evaluateInp={this.numberInput} />
-            <CustomButton value='8' evaluateInp={this.numberInput} />
-            <CustomButton value='9' evaluateInp={this.numberInput} />
-            <CustomButton value='+' evaluateInp={this.operandInput} />
+            <CustomButton value='7' evaluateInp={this.props.numberInput} />
+            <CustomButton value='8' evaluateInp={this.props.numberInput} />
+            <CustomButton value='9' evaluateInp={this.props.numberInput} />
+            <CustomButton value='+' evaluateInp={this.props.operandInput} />
           </View>
           <View style={styles.inputContainer}>
-            <CustomButton value='C' evaluateInp={this.clearScreen} />
-            <CustomButton value='0' evaluateInp={this.numberInput} />
-            <CustomButton value='-' evaluateInp={this.operandInput} />
-            <CustomButton value='=' evaluateInp={this.evaluateInp} />
+            <CustomButton value='C' evaluateInp={this.props.clearScreen} />
+            <CustomButton value='0' evaluateInp={this.props.numberInput} />
+            <CustomButton value='-' evaluateInp={this.props.operandInput} />
+            <CustomButton value='=' evaluateInp={this.props.evaluateInput} />
           </View>
         </View>
 
@@ -137,6 +73,7 @@ export default class App extends Component {
     );
   }
 }
+    
 
 const styles = StyleSheet.create({
   container: {
@@ -191,11 +128,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF',
     height: 100
   },
-  buttonContainer: {
-    width: 100,
-  },
-  numberButton: {
-    justifyContent: 'center',
-    height: 100
-  }
+  
 });
+
+
+
+function mapStateToProps(state){
+  return{
+    evaluator: state.evaluator
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return bindActionCreators({
+    evaluateInput:evaluateInput,
+    clearScreen:clearScreen,
+    numberInput:numberInput,
+    operandInput: operandInput
+  },dispatch)
+}
+
+
+// export const Main = connect(state=>({calculatorState:state}),dispatch=>bindActionCreators({
+//   pressNumWithDispatch:pressNum,
+//   enterAction:enter,
+//   operationAction:operation
+// },dispatch,),)(App);
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

@@ -1,0 +1,4 @@
+export const EVALUATE_INPUT = 'EVALUATE_INPUT'
+export const NUMBER_INPUT =  'NUMBER_INPUT'
+export const OPERAND_INPUT = 'OPERAND_INPUT'
+export const CLEAR_SCREEN = 'CLEAR_SCREEN'
